@@ -1,15 +1,32 @@
 import "reflect-metadata";
 import { DataSource, ObjectLiteral, ObjectType, Repository } from "typeorm";
-import { Vulneravel } from "./models/Vulneravel";
-import { ProblemaSaude } from "./models/ProblemaSaude";
-import { Initial1712259339338 } from "./migrations/1712259339338-initial";
+import { logger } from "../lib/logger";
+
+import { Session } from "./models/Session";
+import { Situacao } from "./models/Situacao";
+import { Solicitacao } from "./models/Solicitacao";
+import { Usuario } from "./models/Usuario";
+import { AuxilioMedicamento } from "./models/Solicitacao/AuxilioMedicamento";
+import { CestaBasica } from "./models/Solicitacao/CestaBasica";
+import { VagaCreche } from "./models/Solicitacao/VagaCreche";
+import { VagaEscola } from "./models/Solicitacao/VagaEscola";
+import { Initial1713672834377 } from "./migrations/1713672834377-initial";
 
 export const dbDataSource = new DataSource({
   type: "mysql",
   url: process.env.MYSQL_URL,
   synchronize: false,
-  entities: [Vulneravel, ProblemaSaude],
-  migrations: [Initial1712259339338],
+  entities: [
+    Session,
+    Situacao,
+    Solicitacao,
+    Usuario,
+    AuxilioMedicamento,
+    CestaBasica,
+    VagaCreche,
+    VagaEscola,
+  ],
+  migrations: [Initial1713672834377],
   subscribers: [],
 });
 
@@ -22,7 +39,12 @@ class DatabaseSource {
 
   async getConnection(): Promise<DataSource> {
     if (!this.dataSource.isInitialized) {
-      await this.dataSource.initialize();
+      try {
+        await this.dataSource.initialize();
+      } catch (e) {
+        logger.error("CRITICAL: Failed to Connect to Database!");
+        throw e;
+      }
     }
 
     return this.dataSource;
